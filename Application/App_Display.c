@@ -2,8 +2,11 @@
 
 uint8_t machine_id = 1;   // 设备id
 uint8_t display_page = 0; // 页面序号
-int16_t set_speed;        // 设置转速,范围-100~100,绝对值越大，速度越大
-int16_t current_speed;    // 当前转速
+GearMotor_PID_Type motor_pid = {
+    .kp = 0.04,
+    .ki = 0.1,
+    .kd = 0.1
+}; 
 
 /**
  * 使用AT24C02来永久化存储从设备ID
@@ -55,10 +58,9 @@ void App_OLED_Display(void)
             // 展示“直流减速电机项目”
             Int_oled_displayWord(i * 2, 0, 13 + i);
         }
-        sprintf(str, "Set:%-4d", set_speed);
+        sprintf(str, "Set:%-4d", (int32_t)motor_pid.target_speed);
         Int_oled_displayStr(4, 1, str);
-        Int_Gear_Motor_GetSpeed();
-        sprintf(str, "Speed:%-4d",current_speed);
+        sprintf(str, "Speed:%-4d",(int32_t)motor_pid.current_speed);
         Int_oled_displayStr(4, 2, str);
     }
     else if (display_page == 1)
@@ -71,5 +73,4 @@ void App_OLED_Display(void)
         sprintf(str, "ID:%03d", machine_id);
         Int_oled_displayStr(5, 1, str);
     }
-    HAL_Delay(100);
 }

@@ -3,7 +3,7 @@
 uint8_t key_value;
 extern uint8_t machine_id;
 extern uint8_t display_page;
-extern int16_t set_speed;
+extern GearMotor_PID_Type motor_pid;
 
 /**
  * 根据用户按下不同的按键 会进行不同的响应
@@ -22,45 +22,39 @@ void App_Key_Function(void)
     else if (display_page == 0)
     {
         // 当前为主页面
-        // 按下key1 => 速度加25
-        // 按下key2 => 速度减25
+        // 按下key1 => 速度加15
+        // 按下key2 => 速度减15
         // 按下key3 => 速度归0
         switch (key_value)
         {
         case 1:
             key_value = 0;
-            set_speed += 25;
-            if (set_speed >= 100)
+            motor_pid.target_speed += 15;
+            if (motor_pid.target_speed >= 120)
             {
-                set_speed = 100;
+                motor_pid.target_speed = 120;
             }
             break;
         case 2:
             key_value = 0;
-            set_speed -= 25;
-            if (set_speed <= -100)
+            motor_pid.target_speed -= 15;
+            if (motor_pid.target_speed <= -120)
             {
-                set_speed = -100;
+                motor_pid.target_speed = -120;
             }
             break;
         case 3:
             key_value = 0;
-            set_speed = 0;
+            motor_pid.target_speed = 0;
             break;
         default:
             break;
         }
 
-        if (set_speed == 0)
+        if ((int32_t)motor_pid.target_speed == 0)
         {
             Int_Gear_Motor_Stop();
         }
-        else
-        {
-            Int_Gear_Motor_SetSpeed(set_speed);
-        }
-        
-        
     }
     else if (display_page == 1)
     {

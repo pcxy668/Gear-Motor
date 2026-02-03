@@ -93,6 +93,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   MX_TIM4_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   App_ID_Init();
   App_OLED_Init();
@@ -105,6 +106,7 @@ int main(void)
   {
     App_Key_Function();
     App_OLED_Display();
+    HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
