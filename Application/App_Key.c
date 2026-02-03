@@ -22,14 +22,14 @@ void App_Key_Function(void)
     else if (display_page == 0)
     {
         // 当前为主页面
-        // 按下key1 => 速度加20
-        // 按下key2 => 速度减20
+        // 按下key1 => 速度加25
+        // 按下key2 => 速度减25
         // 按下key3 => 速度归0
         switch (key_value)
         {
         case 1:
             key_value = 0;
-            set_speed += 20;
+            set_speed += 25;
             if (set_speed >= 100)
             {
                 set_speed = 100;
@@ -37,7 +37,7 @@ void App_Key_Function(void)
             break;
         case 2:
             key_value = 0;
-            set_speed -= 20;
+            set_speed -= 25;
             if (set_speed <= -100)
             {
                 set_speed = -100;
@@ -92,7 +92,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     if (GPIO_Pin == KEY1_Pin || GPIO_Pin == KEY2_Pin || GPIO_Pin == KEY3_Pin || GPIO_Pin == KEY4_Pin)
     {
-        HAL_Delay(10);
+        HAL_Delay(15);
         if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_RESET)
         {
             key_value = 1;

@@ -3,6 +3,7 @@
 
 #include "Int_oled.h"
 #include "Int_eeprom.h"
+#include "Int_gear_motor.h"
 #include "stdio.h"
 
 void App_ID_Init(void);

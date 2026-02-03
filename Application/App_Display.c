@@ -3,6 +3,7 @@
 uint8_t machine_id = 1;   // 设备id
 uint8_t display_page = 0; // 页面序号
 int16_t set_speed;        // 设置转速,范围-100~100,绝对值越大，速度越大
+int16_t current_speed;    // 当前转速
 
 /**
  * 使用AT24C02来永久化存储从设备ID
@@ -56,7 +57,8 @@ void App_OLED_Display(void)
         }
         sprintf(str, "Set:%-4d", set_speed);
         Int_oled_displayStr(4, 1, str);
-        sprintf(str, "Speed:");
+        Int_Gear_Motor_GetSpeed();
+        sprintf(str, "Speed:%-4d",current_speed);
         Int_oled_displayStr(4, 2, str);
     }
     else if (display_page == 1)
