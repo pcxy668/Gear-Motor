@@ -109,7 +109,7 @@ static void prvvUARTRxISR( void )
 void USART2_IRQHandler(void)
 {
     // 检查接收数据寄存器非空标志位是否被置位
-    if (__HAL_UART_GET_FLAG(&huart2,UART_FLAG_RXNE) == TRUE)
+    if (__HAL_UART_GET_FLAG(&huart2,UART_FLAG_RXNE) != RESET)
     {
         // 清除接收数据寄存器非空标志位
         __HAL_UART_CLEAR_FLAG(&huart2,UART_FLAG_RXNE);
@@ -119,7 +119,7 @@ void USART2_IRQHandler(void)
     }
     
     // 检查发送数据寄存器为空标志位是否被置位
-    if (__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TXE) == TRUE)
+    if (__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TXE) != RESET)
     {
         // 清除发送数据寄存器为空标志位
         __HAL_UART_CLEAR_FLAG(&huart2,UART_FLAG_TXE);
@@ -127,4 +127,6 @@ void USART2_IRQHandler(void)
         // 通知modbus数据可以发送
         prvvUARTTxReadyISR();
     }    
+
+    HAL_UART_IRQHandler(&huart2); //调用HAL库的USART2中断处理函数，以清除其他中断标志位
 }

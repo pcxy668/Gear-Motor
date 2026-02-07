@@ -41,6 +41,8 @@
 
 #include "mbcrc.h"
 #include "mbport.h"
+//add by myself
+#include "Com_Debug.h"
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_SER_PDU_SIZE_MIN     4       /*!< Minimum size of a Modbus RTU frame. */
@@ -177,6 +179,15 @@ eMBRTUReceive( UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength )
     {
         eStatus = MB_EIO;
     }
+    
+    //add by myself
+    printf("crc result: %d\n",usMBCRC16( ( UCHAR * ) ucRTUBuf, usRcvBufferPos));
+    printf("Receive data:\n");
+    for (uint8_t i = 0; i < usRcvBufferPos; i++)
+    {
+        printf("%02x ", ucRTUBuf[i]);
+    }
+    
 
     EXIT_CRITICAL_SECTION(  );
     return eStatus;

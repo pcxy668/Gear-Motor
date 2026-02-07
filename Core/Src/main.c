@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "App_Display.h"
 #include "App_Key.h"
+#include "mb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,7 +48,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern uint8_t machine_id;
+extern uint8_t REG_COILS_BUF[REG_COILS_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -77,7 +79,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  HAL_Delay(1);
+  HAL_Delay(500);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -100,14 +102,34 @@ int main(void)
   App_ID_Init();
   App_OLED_Init();
   Int_Gear_Motor_Init();
+
+  //modbus初始化
+  //此处的波特率填写不生效 => 直接使用的hal库
+  eMBInit(MB_RTU,machine_id,0,115200,MB_PAR_NONE);
+  eMBEnable();
+  printf("gear motor start!\n");
+  uint16_t count = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    // 打印线圈寄存器值
+    // count++;
+    // if(count>= 10)
+    // {
+    //   count = 0;
+    //   printf("printf coil-Reg\n");
+    //   for (uint8_t i = 0; i < 10; i++)
+    //   {
+    //     printf("%d ",REG_COILS_BUF[i]);
+    //   }
+    //   printf("\n");
+    // }
     App_Key_Function();
     App_OLED_Display();
+    eMBPoll();
     HAL_Delay(100);
     /* USER CODE END WHILE */
 

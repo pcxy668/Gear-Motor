@@ -34,7 +34,7 @@ BOOL
 xMBPortTimersInit( USHORT usTim1Timerout50us )
 {
     // 已在main.c初始化 MX_TIM3_Init();
-    return FALSE;
+    return TRUE;
 }
 
 
@@ -67,7 +67,7 @@ static void prvvTIMERExpiredISR( void )
 void TIM3_IRQHandler(void)
 {
     // 判断是否为溢出中断
-    if (__HAL_TIM_GET_FLAG(&htim3,TIM_FLAG_UPDATE) == TRUE)
+    if (__HAL_TIM_GET_FLAG(&htim3,TIM_FLAG_UPDATE) != RESET)
     {
         // 清除溢出中断标志位
         __HAL_TIM_CLEAR_FLAG(&htim3,TIM_FLAG_UPDATE);
@@ -75,4 +75,6 @@ void TIM3_IRQHandler(void)
         // 调用定时器中断处理函数
         prvvTIMERExpiredISR();
     }
+
+    HAL_TIM_IRQHandler(&htim3); //调用HAL库的TIM3中断处理函数,以清除其他中断标志位
 }

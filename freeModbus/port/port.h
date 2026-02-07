@@ -28,6 +28,7 @@
 /* add by myself start */
 #include "usart.h"
 #include "tim.h"
+#include "com_debug.h"
 /* add by myself end */
 
 #define	INLINE                      inline

@@ -201,6 +201,8 @@ eMBErrorCode eMBRegCoilsCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNCoil
         }
     }
 
+    printf("receive coils data\n");
+
     return MB_ENOERR;
 }
 
