@@ -4,6 +4,7 @@
 #include "tim.h"
 #include "gpio.h"
 #include "Com_Debug.h"
+#include "port.h"
 #include "stdlib.h"
 
 typedef struct 

@@ -10,11 +10,11 @@ uint8_t REG_DISC_BUF[REG_DISC_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 // 声明保持寄存器缓冲区，用于存储十路保持寄存器的值 可读可写的寄存器
 // [2] => 目标转速
-uint16_t REG_HOLD_BUF[REG_HOLD_SIZE] = {0, 0, 500, 0, 0, 0, 0, 0, 0, 0};
+uint16_t REG_HOLD_BUF[REG_HOLD_SIZE] = {0, 0, 120, 0, 0, 0, 0, 0, 0, 0};
 
 // 声明输入寄存器缓冲区，用于存储十路输入寄存器的值  只读的寄存器
 // [3] => 当前转速
-uint16_t REG_INPUT_BUF[REG_INPUT_SIZE];
+uint16_t REG_INPUT_BUF[REG_INPUT_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 // 0. 提前将功能码对应的处理函数编写加注册
 // 1. 底层接收数据使用串口 => 使用3.5字符时间间隔判断一条命令
@@ -22,94 +22,6 @@ uint16_t REG_INPUT_BUF[REG_INPUT_SIZE];
 // 3. 获取命令中的功能码
 // 4. 根据功能码调用相应的处理函数
 
-/**
- * @brief CMD4命令处理回调函数
- *
- * 该函数用于处理MODBUS协议中的CMD4命令，即读取输入寄存器。
- * 它将指定地址范围内的输入寄存器的值复制到缓冲区中。
- *
- * @param pucRegBuffer 指向用于存储寄存器值的缓冲区的指针。
- * @param usAddress 要读取的起始寄存器地址。
- * @param usNRegs 要读取的寄存器数量。
- *
- * @return 返回执行结果的错误代码。
- */
-eMBErrorCode eMBRegInputCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs)
-{
-    // 计算寄存器索引，从0开始
-    USHORT usRegIndex = usAddress - 1;
-
-    // 非法检测：检查访问范围是否超出寄存器缓冲区大小
-    if ((usRegIndex + usNRegs) > REG_INPUT_SIZE)
-    {
-        return MB_ENOREG;
-    }
-
-    // 循环读取寄存器值并写入缓冲区
-    while (usNRegs > 0)
-    {
-        // 将寄存器的高8位写入缓冲区
-        *pucRegBuffer++ = (unsigned char)(REG_INPUT_BUF[usRegIndex] >> 8);
-        // 将寄存器的低8位写入缓冲区
-        *pucRegBuffer++ = (unsigned char)(REG_INPUT_BUF[usRegIndex] & 0xFF);
-        usRegIndex++;
-        usNRegs--;
-    }
-
-    return MB_ENOERR;
-}
-
-/**
- * @brief CMD6、3、16命令处理回调函数
- *
- * 该函数用于处理Modbus协议中的 Holding Registers 读写请求。
- * 它根据请求的模式（读或写）对指定的寄存器进行相应的操作。
- *
- * @param pucRegBuffer 寄存器数据缓冲区，用于读取或写入寄存器数据。
- * @param usAddress 请求访问的起始寄存器地址。
- * @param usNRegs 请求访问的寄存器数量。
- * @param eMode 访问模式，可以是 MB_REG_WRITE（写寄存器）或 MB_REG_READ（读寄存器）。
- *
- * @return 返回执行结果，如果成功则返回 MB_ENOERR，否则返回相应的错误代码。
- */
-eMBErrorCode eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode)
-{
-    // 计算寄存器索引，Modbus 地址从 1 开始，数组索引从 0 开始，因此需要减 1。
-    USHORT usRegIndex = usAddress - 1;
-
-    // 非法检测：检查访问范围是否超出寄存器缓冲区大小。
-    if ((usRegIndex + usNRegs) > REG_HOLD_SIZE)
-    {
-        return MB_ENOREG;
-    }
-
-    // 写寄存器
-    if (eMode == MB_REG_WRITE)
-    {
-        // 循环将每个寄存器的数据从缓冲区写入到寄存器中。
-        while (usNRegs > 0)
-        {
-            REG_HOLD_BUF[usRegIndex] = (pucRegBuffer[0] << 8) | pucRegBuffer[1];
-            pucRegBuffer += 2;
-            usRegIndex++;
-            usNRegs--;
-        }
-    }
-    // 读寄存器
-    else
-    {
-        // 循环将每个寄存器的数据从寄存器中读取到缓冲区。
-        while (usNRegs > 0)
-        {
-            *pucRegBuffer++ = (unsigned char)(REG_HOLD_BUF[usRegIndex] >> 8);
-            *pucRegBuffer++ = (unsigned char)(REG_HOLD_BUF[usRegIndex] & 0xFF);
-            usRegIndex++;
-            usNRegs--;
-        }
-    }
-
-    return MB_ENOERR;
-}
 
 /**
  * @brief CMD1、5、15命令处理回调函数
@@ -201,7 +113,7 @@ eMBErrorCode eMBRegCoilsCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNCoil
         }
     }
 
-    printf("receive coils data\n");
+    printf("modify coils[2]data:%d\n",REG_COILS_BUF[2]);
 
     return MB_ENOERR;
 }
@@ -261,6 +173,97 @@ eMBErrorCode eMBRegDiscreteCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usND
     for (usRegIndex = 0; usRegIndex < REG_DISC_SIZE; usRegIndex++)
     {
         REG_DISC_BUF[usRegIndex] = !REG_DISC_BUF[usRegIndex];
+    }
+
+    return MB_ENOERR;
+}
+
+/**
+ * @brief CMD6、3、16命令处理回调函数
+ *
+ * 该函数用于处理Modbus协议中的 Holding Registers 读写请求。
+ * 它根据请求的模式（读或写）对指定的寄存器进行相应的操作。
+ *
+ * @param pucRegBuffer 寄存器数据缓冲区，用于读取或写入寄存器数据。
+ * @param usAddress 请求访问的起始寄存器地址。
+ * @param usNRegs 请求访问的寄存器数量。
+ * @param eMode 访问模式，可以是 MB_REG_WRITE（写寄存器）或 MB_REG_READ（读寄存器）。
+ *
+ * @return 返回执行结果，如果成功则返回 MB_ENOERR，否则返回相应的错误代码。
+ */
+eMBErrorCode eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode)
+{
+    // 计算寄存器索引，Modbus 地址从 1 开始，数组索引从 0 开始，因此需要减 1。
+    USHORT usRegIndex = usAddress - 1;
+
+    // 非法检测：检查访问范围是否超出寄存器缓冲区大小。
+    if ((usRegIndex + usNRegs) > REG_HOLD_SIZE)
+    {
+        return MB_ENOREG;
+    }
+
+    // 写寄存器
+    if (eMode == MB_REG_WRITE)
+    {
+        // 循环将每个寄存器的数据从缓冲区写入到寄存器中。
+        while (usNRegs > 0)
+        {
+            REG_HOLD_BUF[usRegIndex] = (pucRegBuffer[0] << 8) | pucRegBuffer[1];
+            pucRegBuffer += 2;
+            usRegIndex++;
+            usNRegs--;
+        }
+    }
+    // 读寄存器
+    else
+    {
+        // 循环将每个寄存器的数据从寄存器中读取到缓冲区。
+        while (usNRegs > 0)
+        {
+            *pucRegBuffer++ = (unsigned char)(REG_HOLD_BUF[usRegIndex] >> 8);
+            *pucRegBuffer++ = (unsigned char)(REG_HOLD_BUF[usRegIndex] & 0xFF);
+            usRegIndex++;
+            usNRegs--;
+        }
+    }
+
+    printf("modify holding[2]data:%d\n",REG_HOLD_BUF[2]);
+
+    return MB_ENOERR;
+}
+
+/**
+ * @brief CMD4命令处理回调函数
+ *
+ * 该函数用于处理MODBUS协议中的CMD4命令，即读取输入寄存器。
+ * 它将指定地址范围内的输入寄存器的值复制到缓冲区中。
+ *
+ * @param pucRegBuffer 指向用于存储寄存器值的缓冲区的指针。
+ * @param usAddress 要读取的起始寄存器地址。
+ * @param usNRegs 要读取的寄存器数量。
+ *
+ * @return 返回执行结果的错误代码。
+ */
+eMBErrorCode eMBRegInputCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs)
+{
+    // 计算寄存器索引，从0开始
+    USHORT usRegIndex = usAddress - 1;
+
+    // 非法检测：检查访问范围是否超出寄存器缓冲区大小
+    if ((usRegIndex + usNRegs) > REG_INPUT_SIZE)
+    {
+        return MB_ENOREG;
+    }
+
+    // 循环读取寄存器值并写入缓冲区
+    while (usNRegs > 0)
+    {
+        // 将寄存器的高8位写入缓冲区
+        *pucRegBuffer++ = (unsigned char)(REG_INPUT_BUF[usRegIndex] >> 8);
+        // 将寄存器的低8位写入缓冲区
+        *pucRegBuffer++ = (unsigned char)(REG_INPUT_BUF[usRegIndex] & 0xFF);
+        usRegIndex++;
+        usNRegs--;
     }
 
     return MB_ENOERR;

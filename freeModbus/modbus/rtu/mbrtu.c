@@ -180,13 +180,14 @@ eMBRTUReceive( UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength )
         eStatus = MB_EIO;
     }
     
-    //add by myself
-    printf("crc result: %d\n",usMBCRC16( ( UCHAR * ) ucRTUBuf, usRcvBufferPos));
-    printf("Receive data:\n");
-    for (uint8_t i = 0; i < usRcvBufferPos; i++)
-    {
-        printf("%02x ", ucRTUBuf[i]);
-    }
+    //***********************************ADD BY MYSELF*******************************************************************************
+    // 用于调试时显示modbus接收到的数据
+    // printf("crc result: %d\n",usMBCRC16( ( UCHAR * ) ucRTUBuf, usRcvBufferPos));
+    // printf("Receive data:\n");
+    // for (uint8_t i = 0; i < usRcvBufferPos; i++)
+    // {
+    //     printf("%02x ", ucRTUBuf[i]);
+    // }
     
 
     EXIT_CRITICAL_SECTION(  );

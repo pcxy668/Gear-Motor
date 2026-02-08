@@ -1,6 +1,9 @@
 #include "Int_gear_motor.h"
 
 extern GearMotor_PID_Type motor_pid;
+extern uint8_t REG_COILS_BUF[REG_COILS_SIZE];
+extern uint8_t REG_DISC_BUF[REG_DISC_SIZE];
+extern uint16_t REG_INPUT_BUF[REG_INPUT_SIZE];
 
 void Int_Gear_Motor_Init(void)
 {
@@ -17,6 +20,10 @@ void Int_Gear_Motor_Stop(void)
     motor_pid.error = 0;
     motor_pid.error_last = 0;
     motor_pid.output = 0;
+
+    //线圈更新电机运行状态
+    REG_COILS_BUF[2] = 0;
+
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
     HAL_GPIO_WritePin(MOTOR_IN1_GPIO_Port, MOTOR_IN1_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(MOTOR_IN2_GPIO_Port, MOTOR_IN2_Pin, GPIO_PIN_RESET);
@@ -29,12 +36,20 @@ void Int_Gear_Motor_SetSpeed()
         // 正转
         HAL_GPIO_WritePin(MOTOR_IN1_GPIO_Port, MOTOR_IN1_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(MOTOR_IN2_GPIO_Port, MOTOR_IN2_Pin, GPIO_PIN_SET);
+
+        //线圈更新电机运行状态
+        REG_COILS_BUF[2] = 1;   
+        REG_DISC_BUF[2] = 1;
     }
     else if ((int32_t)motor_pid.target_speed < 0)
     {
         // 反转
         HAL_GPIO_WritePin(MOTOR_IN1_GPIO_Port, MOTOR_IN1_Pin, GPIO_PIN_SET);
         HAL_GPIO_WritePin(MOTOR_IN2_GPIO_Port, MOTOR_IN2_Pin, GPIO_PIN_RESET);
+
+        //线圈更新电机运行状态
+        REG_COILS_BUF[2] = 1;  
+        REG_DISC_BUF[2] = 0; 
     }
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, motor_pid.output);
 }
@@ -44,6 +59,9 @@ void Int_Gear_Motor_GetSpeed(void)
     if ((int32_t)motor_pid.target_speed == 0)
     {
         motor_pid.current_speed = 0;
+
+        //线圈更新电机运行状态
+        REG_COILS_BUF[2] = 0;        
     }
     else
     {
@@ -60,6 +78,9 @@ void Int_Gear_Motor_GetSpeed(void)
             motor_pid.current_speed = -motor_pid.current_speed;
         }
     }
+
+    //更新输入寄存器值
+    REG_INPUT_BUF[3] = motor_pid.current_speed;
 }
 
 void Int_Gear_Motor_CalculatePID()

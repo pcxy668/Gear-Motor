@@ -4,6 +4,7 @@ uint8_t key_value;
 extern uint8_t machine_id;
 extern uint8_t display_page;
 extern GearMotor_PID_Type motor_pid;
+extern uint16_t REG_HOLD_BUF[REG_HOLD_SIZE];
 
 /**
  * 根据用户按下不同的按键 会进行不同的响应
@@ -34,6 +35,10 @@ void App_Key_Function(void)
             {
                 motor_pid.target_speed = 120;
             }
+
+            //更新速度寄存器值（速度寄存器范围0~240，target.speed范围-120~120）
+            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 120);
+
             break;
         case 2:
             key_value = 0;
@@ -42,19 +47,44 @@ void App_Key_Function(void)
             {
                 motor_pid.target_speed = -120;
             }
+
+            //更新速度寄存器值（速度寄存器范围0~240，target.speed范围-120~120）
+            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 120);
+
             break;
         case 3:
             key_value = 0;
             motor_pid.target_speed = 0;
+            
+            //更新速度寄存器值（速度寄存器范围0~240，target.speed范围-120~120）
+            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 120);
+            
             break;
         default:
             break;
         }
 
-        if ((int32_t)motor_pid.target_speed == 0)
+        // 如果速度寄存器值和目标速度不一致，则更新速度寄存器值
+        if (REG_HOLD_BUF[2] != (uint16_t)(motor_pid.target_speed + 120))
+        {
+            motor_pid.target_speed = (float)(REG_HOLD_BUF[2] - 120);
+        }
+
+        if ((int32_t)motor_pid.target_speed != 0)
+        {
+            REG_COILS_BUF[2] = 1;
+        }
+        else
+        {
+            // 如果目标速度为0，则停止电机
+            Int_Gear_Motor_Stop();
+        }
+
+        if (REG_COILS_BUF[2] == 0)
         {
             Int_Gear_Motor_Stop();
         }
+        
     }
     else if (display_page == 1)
     {

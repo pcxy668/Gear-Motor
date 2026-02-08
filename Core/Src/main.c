@@ -108,7 +108,7 @@ int main(void)
   eMBInit(MB_RTU,machine_id,0,115200,MB_PAR_NONE);
   eMBEnable();
   printf("gear motor start!\n");
-  uint16_t count = 0;
+  //uint16_t count = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */

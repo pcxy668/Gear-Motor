@@ -5,7 +5,7 @@ uint8_t display_page = 0; // 页面序号
 GearMotor_PID_Type motor_pid = {
     .kp = 0.04,
     .ki = 0.1,
-    .kd = 0.1
+    .kd = 0
 }; 
 
 /**
