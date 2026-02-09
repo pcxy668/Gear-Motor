@@ -31,33 +31,33 @@ void App_Key_Function(void)
         case 1:
             key_value = 0;
             motor_pid.target_speed += 15;
-            if (motor_pid.target_speed >= 120)
+            if (motor_pid.target_speed >= 180)
             {
-                motor_pid.target_speed = 120;
+                motor_pid.target_speed = 180;
             }
 
-            //更新速度寄存器值（速度寄存器范围0~240，target.speed范围-120~120）
-            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 120);
+            //更新速度寄存器值（速度寄存器范围0~360，target.speed范围-180~180）
+            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 180);
 
             break;
         case 2:
             key_value = 0;
             motor_pid.target_speed -= 15;
-            if (motor_pid.target_speed <= -120)
+            if (motor_pid.target_speed <= -180)
             {
-                motor_pid.target_speed = -120;
+                motor_pid.target_speed = -180;
             }
 
-            //更新速度寄存器值（速度寄存器范围0~240，target.speed范围-120~120）
-            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 120);
+            //更新速度寄存器值（速度寄存器范围0~360，target.speed范围-180~180）
+            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 180);
 
             break;
         case 3:
             key_value = 0;
             motor_pid.target_speed = 0;
             
-            //更新速度寄存器值（速度寄存器范围0~240，target.speed范围-120~120）
-            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 120);
+            //更新速度寄存器值（速度寄存器范围0~360，target.speed范围-180~180）
+            REG_HOLD_BUF[2] = (uint16_t)(motor_pid.target_speed + 180);
             
             break;
         default:
@@ -65,9 +65,9 @@ void App_Key_Function(void)
         }
 
         // 如果速度寄存器值和目标速度不一致，则更新速度寄存器值
-        if (REG_HOLD_BUF[2] != (uint16_t)(motor_pid.target_speed + 120))
+        if (REG_HOLD_BUF[2] != (uint16_t)(motor_pid.target_speed + 180))
         {
-            motor_pid.target_speed = (float)(REG_HOLD_BUF[2] - 120);
+            motor_pid.target_speed = (float)(REG_HOLD_BUF[2] - 180);
         }
 
         if ((int32_t)motor_pid.target_speed != 0)

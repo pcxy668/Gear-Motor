@@ -23,7 +23,8 @@ void Int_Gear_Motor_Stop(void)
 
     //线圈更新电机运行状态
     REG_COILS_BUF[2] = 0;
-
+    REG_INPUT_BUF[3] = 0;
+    
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
     HAL_GPIO_WritePin(MOTOR_IN1_GPIO_Port, MOTOR_IN1_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(MOTOR_IN2_GPIO_Port, MOTOR_IN2_Pin, GPIO_PIN_RESET);
