@@ -7,6 +7,7 @@
 * Interface 接口层
 * Application 应用层
 * MDK-ARM MDK工具链
+* freeModbus Modbus模块
 ### 2.硬件组成
 *  主控芯片 STM32F103C8T6  
 *  电机驱动芯片 L298N  
